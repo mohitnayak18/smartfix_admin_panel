@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ================= PRODUCTS =================
+    match /products/{docId} {
+      allow read: if true;                     // public read
+      allow write: if request.auth != null;    // authenticated write
+    }
+
+    // ================= USER ADDRESSES =================
+    match /users/{userId}/addresses/{addressId} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+match /users/{userId}/addresses/{addressId} {
+      function isValidAddress() {
+        return request.resource.data.title is string &&
+               request.resource.data.title.size() >= 2 &&
+               request.resource.data.title.size() <= 50 &&
+               request.resource.data.address is string &&
+               request.resource.data.address.size() >= 5 &&
+               request.resource.data.address.size() <= 200 &&
+               request.resource.data.type is string &&
+               request.resource.data.type in ['home', 'work', 'current', 'searched'] &&
+               request.resource.data.userId == userId;
+      }
+      
+      allow create: if isValidAddress();
+      allow update: if isValidAddress();
+    }
+    // ================= USER PROFILE (optional) =================
+    match /users/{userId} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == userId;
+    }
+
+    // ================= DEFAULT (SAFE) =================
+    match /{document=**} {
+      allow read: if true;   // block everything else
+      allow write: if true;
+    }
+  }
+}
+
