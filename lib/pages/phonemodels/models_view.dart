@@ -154,7 +154,7 @@ class _ModelPageState extends State<ModelPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // automaticallyImplyActions: false,
+        automaticallyImplyActions: true,
         automaticallyImplyLeading: false,
         title: const Text(
           "Model Management",
@@ -354,75 +354,80 @@ class _ModelPageState extends State<ModelPage> {
                 }
 
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  scrollDirection: Axis.horizontal, // ✅ ADD THIS
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: DataTable(
+                      dataRowMinHeight: 80,
+                      dataRowMaxHeight: 90,
+                      columnSpacing: 30,
+                      dividerThickness: 0,
+                      border: TableBorder.all(color: Colors.white),
 
-                  child: DataTable(
-                    dataRowMinHeight: 80,
-                    dataRowMaxHeight: 90,
-                    columnSpacing: 30,
-                    dividerThickness: 0,
-                    border: TableBorder.all(color: Colors.white),
+                      columns: const [
+                        DataColumn(label: Text("Image")),
+                        DataColumn(label: Text("Model Name")),
+                        DataColumn(label: Text("Brand ID")),
+                        DataColumn(label: Text("Model ID")),
+                        DataColumn(label: Text("Actions")),
+                      ],
 
-                    columns: const [
-                      DataColumn(label: Text("Image")),
-                      DataColumn(label: Text("Model Name")),
-                      DataColumn(label: Text("Brand ID")),
-                      DataColumn(label: Text("Model ID")),
-                      DataColumn(label: Text("Actions")),
-                    ],
+                      rows: List.generate(docs.length, (index) {
+                        var doc = docs[index];
+                        var data = doc.data() as Map<String, dynamic>? ?? {};
 
-                    rows: List.generate(docs.length, (index) {
-                      var doc = docs[index];
-                      var data = doc.data() as Map<String, dynamic>? ?? {};
-
-                      return DataRow(
-                        color: MaterialStateProperty.all(
-                          index % 2 == 0 ? Colors.white : Colors.grey.shade100,
-                        ),
-                        cells: [
-                          /// IMAGE
-                          DataCell(
-                            Image.network(
-                              data["imageUrl"] ?? "",
-                              width: 60,
-                              height: 80,
-                              fit: BoxFit.fitHeight,
-                              errorBuilder: (a, b, c) =>
-                                  const Icon(Icons.image),
-                            ),
+                        return DataRow(
+                          color: MaterialStateProperty.all(
+                            index % 2 == 0
+                                ? Colors.white
+                                : Colors.grey.shade100,
                           ),
+                          cells: [
+                            /// IMAGE
+                            DataCell(
+                              Image.network(
+                                data["imageUrl"] ?? "",
+                                width: 60,
+                                height: 80,
+                                fit: BoxFit.fitHeight,
+                                errorBuilder: (a, b, c) =>
+                                    const Icon(Icons.image),
+                              ),
+                            ),
 
-                          /// NAME
-                          DataCell(Text(data["name"] ?? "")),
+                            /// NAME
+                            DataCell(Text(data["name"] ?? "")),
 
-                          /// BRAND ID
-                          DataCell(Text(data["brandId"] ?? "")),
+                            /// BRAND ID
+                            DataCell(Text(data["brandId"] ?? "")),
 
-                          /// MODEL ID
-                          DataCell(Text(data["modelId"] ?? doc.id)),
+                            /// MODEL ID
+                            DataCell(Text(data["modelId"] ?? doc.id)),
 
-                          /// ACTIONS
-                          DataCell(
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () => editModel(doc),
-                                ),
-
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
+                            /// ACTIONS
+                            DataCell(
+                              PopupMenuButton<String>(
+                                color: Colors.white,
+                                onSelected: (value) {
+                                  if (value == "edit") editModel(doc);
+                                  if (value == "delete") deleteModel(doc.id);
+                                },
+                                itemBuilder: (context) => [
+                                  const PopupMenuItem(
+                                    value: "edit",
+                                    child: Text("Edit",style: TextStyle(color: Colors.teal),),
                                   ),
-                                  onPressed: () => deleteModel(doc.id),
-                                ),
-                              ],
+                                  const PopupMenuItem(
+                                    value: "delete",
+                                    child: Text("Delete",style: TextStyle(color: Colors.red),),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      );
-                    }).toList(),
+                          ],
+                        );
+                      }).toList(),
+                    ),
                   ),
                 );
               },

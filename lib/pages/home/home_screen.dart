@@ -2,22 +2,24 @@ import 'package:admin_panel/pages/home/home_controller.dart';
 import 'package:admin_panel/pages/home/widget/dashboardcard.dart';
 import 'package:admin_panel/pages/home/widget/recent_order.dart';
 import 'package:admin_panel/pages/home/widget/sidebar.dart';
+import 'package:admin_panel/pages/pdf_service/pdf_service_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AdminHomeScreen extends StatelessWidget {
   AdminHomeScreen({super.key});
 
   final HomeController controller = Get.put(HomeController());
-
+  final PDFService _pdfService = PDFService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue.shade100,
       body: Row(
         children: [
-          const AdminSidebar(),
+          AdminSidebar(),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -142,7 +144,10 @@ class AdminHomeScreen extends StatelessWidget {
                         );
                       }
 
-                      return const RecentOrdersTable();
+                      return RecentOrdersTable(
+                        onDownloadPDF: (Map<String, dynamic> order) =>
+                            _pdfService.generateAndSavePDF(order),
+                      );
                     }),
 
                     const SizedBox(height: 30),
@@ -187,24 +192,6 @@ class AdminHomeScreen extends StatelessWidget {
                             latestOrder['mobile'] ??
                             'Not available',
                       );
-
-                      // String customerEmail = _getSafeString(
-                      //   latestOrder['customerEmail'] ??
-                      //       latestOrder['email'] ??
-                      //       latestOrder['userEmail'] ??
-                      //       'Not available',
-                      // );
-
-                      //                      String customerAddress = "Not available";
-
-                      // var addressData = latestOrder['address'];
-
-                      // if (addressData != null && addressData is Map) {
-                      //   String type = addressData['type'] ?? "";
-                      //   String address = addressData['address'] ?? "";
-
-                      //   customerAddress = "$type • $address";
-                      // }
 
                       return Container(
                         margin: const EdgeInsets.only(top: 20),
@@ -447,6 +434,23 @@ class AdminHomeScreen extends StatelessWidget {
                                   color: Colors.purple,
                                   onTap: () => openMap(lat, lng),
                                 ),
+                                _buildQuickActionButton(
+                                  icon: Icons.download,
+                                  label: "PDF",
+                                  color: Colors.teal,
+                                  onTap: () => _pdfService.generateAndSavePDF(
+                                    latestOrder,
+                                  ),
+                                ),
+                                _buildQuickActionButton(
+                                  icon: Iconsax.share,
+                                  label: "Share on whatsapp",
+                                  color: Colors.green.shade700,
+                                  onTap: () => _pdfService.sharePDFViaWhatsApp(
+                                    latestOrder,
+                                    customerPhone,
+                                  ),
+                                ),
                               ],
                             ),
                           ],
@@ -454,7 +458,6 @@ class AdminHomeScreen extends StatelessWidget {
                       );
                     }),
 
-                    /// ADMIN CONTACT INFO (Currently Logged In User)
                     /// ALL USERS WITH PHONE NUMBERS SECTION
                     Obx(() {
                       if (controller.isLoadingUsers.value) {
@@ -675,96 +678,6 @@ class AdminHomeScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-
-                            const SizedBox(height: 10),
-
-                            // Show all users summary
-                            if (controller.phoneUsers.isNotEmpty)
-                              Container(
-                                margin: const EdgeInsets.only(top: 20),
-                                padding: const EdgeInsets.all(18),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.white,
-                                      Colors.green.shade50,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(18),
-                                  border: Border.all(
-                                    color: Colors.green.shade100,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.06),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 5),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            color: Colors.green.shade100,
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          child: Icon(
-                                            Icons.phone_android,
-                                            color: Colors.green.shade700,
-                                          ),
-                                        ),
-
-                                        const SizedBox(width: 12),
-
-                                        const Text(
-                                          "Phone Users",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-
-                                        const Spacer(),
-
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 5,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.green.shade100,
-                                            borderRadius: BorderRadius.circular(
-                                              20,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "${controller.phoneUsers.length}",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.green.shade800,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    const SizedBox(height: 16),
-
-                                    Divider(color: Colors.grey.shade300),
-
-                                    const SizedBox(height: 10),
-                                  ],
-                                ),
-                              ),
                           ],
                         ),
                       );
@@ -805,6 +718,10 @@ class AdminHomeScreen extends StatelessWidget {
   void openWhatsApp(String phone) async {
     final url = Uri.parse("https://wa.me/$phone");
     await launchUrl(url);
+  }
+
+  Future<void> generateOrderPDF(Map<String, dynamic> order) async {
+    await _pdfService.generateAndSavePDF(order);
   }
 
   Widget _buildUserStatCard({

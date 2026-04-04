@@ -128,6 +128,7 @@ class _BannerPageState extends State<BannerPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueGrey,
+        automaticallyImplyActions: true,
         automaticallyImplyLeading: false,
         title: Text(
           "Banner Manager",

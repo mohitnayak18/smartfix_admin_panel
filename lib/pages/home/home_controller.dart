@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 
 class HomeController extends GetxController {
   // Dashboard stats
@@ -24,6 +24,7 @@ class HomeController extends GetxController {
   // Recent orders
   var recentOrders = <Map<String, dynamic>>[].obs;
   var isLoading = false.obs;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void onInit() {
@@ -163,6 +164,15 @@ class HomeController extends GetxController {
     }
   }
 
+Future<void> signOut() async {
+    try {
+      await _auth.signOut();
+      Get.offAllNamed('/login-view');
+      // Get.offAll(() => const LoginView());
+    } catch (e) {
+      Get.snackbar("Logout Failed", e.toString());
+    }
+  }
   // Load dashboard statistics
   Future<void> loadDashboardData() async {
     try {
@@ -253,13 +263,13 @@ class HomeController extends GetxController {
         fetchAllAuthUsers(),
       ]);
       
-      Get.snackbar(
-        'Success',
-        'Data refreshed successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      // Get.snackbar(
+      //   'Success',
+      //   'Data refreshed successfully',
+      //   snackPosition: SnackPosition.BOTTOM,
+      //   backgroundColor: Colors.green,
+      //   colorText: Colors.white,
+      // );
     } catch (e) {
       print("Refresh error: $e");
     }

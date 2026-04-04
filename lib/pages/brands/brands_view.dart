@@ -12,10 +12,19 @@ class BrandPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.blue.shade50,
       appBar: AppBar(
-        title: const Text("Mobile Brands"),
+        automaticallyImplyActions: true,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.blueGrey,
+        title: const Text("Mobile Brands",style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            tooltip: "Add Brand",
+            color: Colors.white,
+            icon: const Icon(Icons.add,color: Colors.black,),
             onPressed: controller.openAddBrandDialog,
           )
         ],
@@ -41,6 +50,7 @@ class BrandPage extends StatelessWidget {
                 leading: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
+                    color: Colors.white,
                     brand["logo"],
                     width: 40,
                     height: 40,
@@ -57,7 +67,7 @@ class BrandPage extends StatelessWidget {
                 ),
                 title: Text(
                   brand["name"],
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 subtitle: Text("Rating: ${brand["rating"]}"),
                 trailing: IconButton(
@@ -77,6 +87,7 @@ class BrandPage extends StatelessWidget {
   void _showDeleteConfirmation(BuildContext context, dynamic brand) {
     Get.dialog(
       AlertDialog(
+        backgroundColor: Colors.white,
         title: const Text("Delete Brand"),
         content: Text("Are you sure you want to delete ${brand["name"]}?"),
         actions: [

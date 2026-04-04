@@ -1,12 +1,6 @@
-import 'package:get/get.dart';
-import 'package:admin_panel/pages/cart/cart.dart';
-
 import 'package:admin_panel/pages/home/home.dart';
-
 import 'package:admin_panel/pages/pages.dart';
-import 'package:admin_panel/pages/auth/auth.dart';
-import 'package:admin_panel/pages/profile/profile.dart';
-
+import 'package:get/get.dart';
 
 part 'app_routes.dart';
 
@@ -16,20 +10,6 @@ class AppPages {
   static const initial = Routes.login;
 
   static final pages = [
-    // GetPage(
-    //   name: _Paths.splash,
-    //   transitionDuration: transitionDuration,
-    //   page: () => const SplashView(),
-    //   binding: SplashBinding(),
-    //   transition: Transition.rightToLeft,
-    // ),
-    // GetPage(
-    //   name: _Paths.onboarding,
-    //   transitionDuration: transitionDuration,
-    //   page: () => const OnboardingScreen(),
-    //   binding: OnboardingBinding(),
-    //   transition: Transition.rightToLeft,
-    // ),
     GetPage(
       name: _Paths.login,
       transitionDuration: transitionDuration,
@@ -37,31 +17,7 @@ class AppPages {
       binding: LoginBinding(),
       transition: Transition.rightToLeft,
     ),
-    GetPage(
-      name: _Paths.auth,
-      transitionDuration: transitionDuration,
-      page: () {
-        final args = Get.arguments;
-        print(' OTP screen args: $args'); // Debug log
-
-        final verificationId =
-            (args as Map<String, dynamic>?)?['verificationId'];
-        final phoneNumber = (args)?['phoneNumber'];
-
-        if (verificationId == null || phoneNumber == null) {
-          print(' Missing arguments! Redirecting back to login.');
-          return LoginView(); // fallback
-        }
-
-        return OtpScreen(
-          // verificationId: verificationId,
-          // phoneNumber: phoneNumber,
-        );
-      },
-
-      binding: AuthBinding(),
-      transition: Transition.rightToLeft,
-    ),
+   
     GetPage(
       name: _Paths.home,
       transitionDuration: transitionDuration,
@@ -69,31 +25,5 @@ class AppPages {
       binding: HomeBinding(),
       transition: Transition.rightToLeft,
     ),
-    // GetPage(
-    //   name: _Paths.profile,
-    //   transitionDuration: transitionDuration,
-    //   page: () => ProfileScreen(),
-    //   binding: ProfileBinding(),
-    //   transition: Transition.rightToLeft,
-    // ),
-    // GetPage(
-    //   name: '/orderDetails',
-    //   page: () => OrderDetailsScreen(orderId: Get.arguments['orderId']),
-    //   binding: CartBinding(), // 🔥 IMPORTANT
-    // ),
-    // GetPage(
-    //   name: _Paths.bookingScreen,
-    //   transitionDuration: transitionDuration,
-    //   page: () => BookingScreen(),
-    //   binding: BookingBinding(),
-    //   transition: Transition.rightToLeft,
-    // ),
-    // GetPage(
-    //   name: '/order-success',
-    //   page: () {
-    //     final arguments = Get.arguments;
-    //     return OrderSuccessScreen(orderData: arguments);
-    //   },
-    // ),
   ];
 }

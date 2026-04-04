@@ -1,6 +1,7 @@
 import 'package:admin_panel/pages/login/login_controller.dart';
 import 'package:admin_panel/theme/dimens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:admin_panel/utils/asset_constants.dart';
@@ -228,6 +229,7 @@ class _LoginViewState extends State<LoginView> {
 
   Widget _buildEmailField(BuildContext context) {
     return TextFormField(
+      
       controller: controller.emailController,
       focusNode: _emailFocusNode,
       keyboardType: TextInputType.emailAddress,
@@ -261,21 +263,36 @@ class _LoginViewState extends State<LoginView> {
         }
       },
       validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Email is required';
-        }
-        if (!GetUtils.isEmail(value.trim())) {
-          return 'Please enter a valid email';
-        }
-        return null;
-      },
-      onChanged: controller.setEmail,
+  if (value == null || value.trim().isEmpty) {
+    return 'Email is required';
+  }
+  if (value != value.toLowerCase()) {
+    return 'Email must be in lowercase';
+  }
+  if (!GetUtils.isEmail(value.trim())) {
+    return 'Please enter a valid email';
+  }
+  return null;
+},
+     onChanged: (value) {
+  final lowerValue = value.toLowerCase();
+
+  controller.emailController.value = TextEditingValue(
+    text: lowerValue,
+    selection: TextSelection.collapsed(offset: lowerValue.length),
+  );
+
+  controller.setEmail(lowerValue);
+},
     );
   }
 
   Widget _buildPasswordField() {
     return Obx(
       () => TextFormField(
+              inputFormatters: [
+  FilteringTextInputFormatter.deny(RegExp(r'\s')),
+],
         controller: controller.passwordController,
         focusNode: _passwordFocusNode,
         obscureText: controller.isPasswordHidden.value,
@@ -324,9 +341,18 @@ class _LoginViewState extends State<LoginView> {
           if (value == null || value.isEmpty) {
             return 'Password is required';
           }
-          if (value.length < 6) {
-            return 'Password must be at least 6 characters';
-          }
+          if (value.length < 8) {
+  return 'Minimum 8 characters required';
+}
+if (!RegExp(r'[A-Z]').hasMatch(value)) {
+  return 'At least 1 uppercase letter required';
+}
+if (!RegExp(r'[0-9]').hasMatch(value)) {
+  return 'At least 1 number required';
+}
+if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+  return 'At least 1 special character required';
+}
           return null;
         },
         onChanged: controller.setPassword,
@@ -337,6 +363,9 @@ class _LoginViewState extends State<LoginView> {
   Widget _buildConfirmPasswordField() {
     return Obx(
       () => TextFormField(
+        inputFormatters: [
+  FilteringTextInputFormatter.deny(RegExp(r'\s')),
+],
         controller: controller.confirmPasswordController,
         focusNode: _confirmPasswordFocusNode,
         obscureText: controller.isConfirmPasswordHidden.value,
