@@ -55,7 +55,7 @@ class RecentOrdersTable extends StatelessWidget {
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-              columnSpacing: 50,
+              columnSpacing: 30,
               headingRowColor: MaterialStateProperty.all(Colors.grey.shade300),
               columns: const [
                 DataColumn(
@@ -85,6 +85,12 @@ class RecentOrdersTable extends StatelessWidget {
                 DataColumn(
                   label: Text(
                     "Model",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    "Partner",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -164,6 +170,11 @@ class RecentOrdersTable extends StatelessWidget {
 
                 String currentStatus =
                     data['status']?.toString().toLowerCase() ?? 'pending';
+                
+                // Get partner info from order
+                String partnerId = data['partnerId']?.toString() ?? '';
+                String partnerName = data['partnerName']?.toString() ?? 'Not Assigned';
+                String partnerPhotoUrl = data['partnerPhotoUrl']?.toString() ?? '';
 
                 return DataRow(
                   cells: [
@@ -176,11 +187,103 @@ class RecentOrdersTable extends StatelessWidget {
                     DataCell(Text(data['phone']?.toString() ?? "N/A")),
                     DataCell(
                       Text(
-                        service != "N/A" ? service + "," + serviceName : "N/A",
+                        service != "N/A" ? service + ", " + serviceName : "N/A",
                       ),
                     ),
                     DataCell(Text(quantity)),
                     DataCell(Text(model)),
+                    // Partner Column with Photo and Name
+                    // Alternative with orders count (using Row instead of Column)
+DataCell(
+  SizedBox(
+    width: 180,
+    height: 40,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Partner Photo
+        if (partnerPhotoUrl.isNotEmpty)
+          CircleAvatar(
+            radius: 12,
+            backgroundImage: NetworkImage(partnerPhotoUrl),
+            onBackgroundImageError: (_, __) {},
+          )
+        else
+          CircleAvatar(
+            radius: 12,
+            backgroundColor: Colors.grey.shade300,
+            child: Icon(
+              Icons.person,
+              size: 12,
+              color: Colors.grey.shade600,
+            ),
+          ),
+        const SizedBox(width: 6),
+        // Partner Info - Name and Orders Count in Column but with constraints
+        Expanded(
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  partnerName,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: partnerId.isNotEmpty
+                        ? FontWeight.w600
+                        : FontWeight.normal,
+                    color: partnerId.isNotEmpty
+                        ? Colors.teal.shade700
+                        : Colors.grey.shade600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                if (partnerId.isNotEmpty)
+                  Text(
+                    '${(data['partnerOrdersCount'] ?? 0)} orders',
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: Colors.grey.shade500,
+                    ),
+                    maxLines: 1,
+                  ),
+              ],
+            ),
+          ),
+        ),
+        // Assign Button if no partner assigned
+        if (partnerId.isEmpty)
+          Container(
+            margin: const EdgeInsets.only(left: 4),
+            child: InkWell(
+              onTap: () => _showAssignPartnerDialog(
+                context,
+                doc.id,
+                data['orderNumber']?.toString() ?? '',
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.teal.shade50,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Icon(
+                  Icons.person_add,
+                  size: 14,
+                  color: Colors.teal.shade600,
+                ),
+              ),
+            ),
+          ),
+      ],
+    ),
+  ),
+),
                     DataCell(
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -207,39 +310,38 @@ class RecentOrdersTable extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                           ),
-                          items:
-                              const [
-                                'pending',
-                                'confirmed',
-                                'assigned',
-                                'on the way',
-                                'processing',
-                                'shipped',
-                                'completed',
-                                'cancelled',
-                              ].map((status) {
-                                return DropdownMenuItem(
-                                  value: status,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 8,
-                                        height: 8,
-                                        decoration: BoxDecoration(
-                                          color: _getStatusColor(status),
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        status.toUpperCase(),
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                    ],
+                          items: const [
+                            'pending',
+                            'confirmed',
+                            'assigned',
+                            'on the way',
+                            'processing',
+                            'shipped',
+                            'completed',
+                            'cancelled',
+                          ].map((status) {
+                            return DropdownMenuItem(
+                              value: status,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: _getStatusColor(status),
+                                      shape: BoxShape.circle,
+                                    ),
                                   ),
-                                );
-                              }).toList(),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    status.toUpperCase(),
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
                           onChanged: (newStatus) {
                             if (newStatus != null &&
                                 newStatus != currentStatus) {
@@ -357,13 +459,12 @@ class RecentOrdersTable extends StatelessWidget {
                           );
                         },
                         child: SizedBox(
-                          width: 250,
+                          width: 200,
                           child: Text(
                             "${data['address']?['address'] ?? ''}",
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.cyan,
-                              // decoration: TextDecoration.underline,
                             ),
                           ),
                         ),
@@ -422,6 +523,348 @@ class RecentOrdersTable extends StatelessWidget {
     );
   }
 
+  // Show dialog to assign partner to order
+void _showAssignPartnerDialog(
+    BuildContext context,
+    String orderId,
+    String orderNumber,
+  ) async {
+    // Fetch partners from Firestore
+    QuerySnapshot partnerSnapshot = await FirebaseFirestore.instance
+        .collection('partners')
+        .where('isAvailable', isEqualTo: true)
+        .get();
+
+    if (partnerSnapshot.docs.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No partners available. Please add partners first.',style: TextStyle(color: Colors.white),),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    List<Map<String, dynamic>> partners = partnerSnapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      return {
+        'id': doc.id,
+        'name': data['name'] ?? 'Unknown',
+        'phoneNumber': data['phoneNumber'] ?? '',
+        'photoUrl': data['photoUrl'] ?? '',
+        'assignedOrdersCount': data['assignedOrdersCount'] ?? 0,
+      };
+    }).toList();
+
+    String? selectedPartnerId;
+    Map<String, dynamic>? selectedPartner;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              title: Row(
+                children: [
+                  const Icon(Icons.person_add, color: Colors.teal),
+                  const SizedBox(width: 8),
+                  const Text('Assign Partner to Order'),
+                ],
+              ),
+              content: Container(
+                width: 400,
+                constraints: const BoxConstraints(
+                  maxHeight: 500, // Add max height constraint
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Order #: $orderNumber',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Select a partner:',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          dropdownColor: Colors.white,
+                          focusColor: Colors.white,
+                          isExpanded: true,
+                          hint: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('Choose a partner'),
+                          ),
+                          value: selectedPartnerId,
+                          items: partners.map<DropdownMenuItem<String>>((partner) {
+                            return DropdownMenuItem<String>(
+                              
+                              value: partner['id']?.toString(),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                child: Row(
+                                  children: [
+                                    // Partner Photo
+                                    ClipOval(
+                                      
+                                      child: partner['photoUrl'].isNotEmpty
+                                          ? Image.network(
+                                              partner['photoUrl'],
+                                              width: 30,
+                                              height: 30,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                return Container(
+                                                  width: 30,
+                                                  height: 30,
+                                                  color: Colors.grey.shade200,
+                                                  child: const Icon(
+                                                    Icons.person,
+                                                    size: 16,
+                                                  ),
+                                                );
+                                              },
+                                            )
+                                          : Container(
+                                              width: 30,
+                                              height: 30,
+                                              color: Colors.grey.shade200,
+                                              child: const Icon(
+                                                Icons.person,
+                                                size: 16,
+                                              ),
+                                            ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    // FIXED: Use Expanded with Row instead of Column
+                                    Expanded(
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            partner['name'],
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 13,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.teal.shade50,
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            // child: Text(
+                                            //   '${partner['assignedOrdersCount']} orders',
+                                            //   style: TextStyle(
+                                            //     fontSize: 10,
+                                            //     color: Colors.teal.shade700,
+                                            //     fontWeight: FontWeight.w500,
+                                            //   ),
+                                            // ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedPartnerId = value;
+                              selectedPartner = partners.firstWhere(
+                                (p) => (p['id']?.toString() ?? '') == value,
+                              );
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    if (selectedPartner != null) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.teal.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Selected Partner Details:',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.person,
+                                    size: 14, color: Colors.teal),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    selectedPartner!['name'],
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(Icons.phone,
+                                    size: 14, color: Colors.teal),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    selectedPartner!['phoneNumber'],
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: selectedPartnerId != null
+                      ? () async {
+                          Navigator.pop(context);
+                          await _assignPartnerToOrder(
+                            context,
+                            orderId,
+                            selectedPartnerId!,
+                            selectedPartner!,
+                          );
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Assign Partner'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Assign partner to order
+  Future<void> _assignPartnerToOrder(
+    BuildContext context,
+    String orderId,
+    String partnerId,
+    Map<String, dynamic> partner,
+  ) async {
+    try {
+      // Show loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              SizedBox(width: 12),
+              Text('Assigning partner...'),
+            ],
+          ),
+          backgroundColor: Colors.blue,
+        ),
+      );
+
+      // Update order with partner info
+      await FirebaseFirestore.instance.collection('orders').doc(orderId).update({
+        'partnerId': partnerId,
+        'partnerName': partner['name'],
+        'partnerPhotoUrl': partner['photoUrl'],
+        'partnerPhone': partner['phoneNumber'],
+        'assignedAt': FieldValue.serverTimestamp(),
+      });
+
+      // Increment partner's assigned orders count
+      await FirebaseFirestore.instance
+          .collection('partners')
+          .doc(partnerId)
+          .update({
+        'assignedOrdersCount': FieldValue.increment(1),
+      });
+
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Text('Partner ${partner['name']} assigned successfully!'),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Expanded(child: Text('Error: $e')),
+            ],
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   bool _isRecentOrder(Timestamp? timestamp) {
     if (timestamp == null) return false;
     DateTime orderTime = timestamp.toDate();
@@ -466,30 +909,24 @@ class RecentOrdersTable extends StatelessWidget {
   }
 
   void openWhatsApp(String phone) async {
-    // Remove any non-digit characters from phone number
     String cleanPhone = phone.replaceAll(RegExp(r'[^0-9+]'), '');
     final url = Uri.parse("https://wa.me/$cleanPhone");
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }
   }
-  // Add this method to share PDF via WhatsApp
 
-  // Add this method to share PDF via WhatsApp
   Future<void> sharePDFViaWhatsApp(
     Map<String, dynamic> orderData,
     String phoneNumber,
   ) async {
     try {
-      // Show loading dialog
       Get.dialog(
         const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
       );
 
       final PDFService pdfService = PDFService();
-
-      // Generate PDF
       final Uint8List? bytes = await pdfService.generatePDFBytes(orderData);
 
       if (bytes == null || bytes.isEmpty) {
@@ -503,50 +940,34 @@ class RecentOrdersTable extends StatelessWidget {
         return;
       }
 
-      print("PDF Generated - Size: ${bytes.length} bytes");
-
       String orderId =
           orderData['orderId'] ?? orderData['orderNumber'] ?? 'ORDER';
       String customerName =
           orderData['customerName'] ?? orderData['userName'] ?? 'Customer';
       String totalAmount = orderData['finalAmount']?.toString() ?? '0';
 
-      Get.back(); // Close loader
+      Get.back();
 
-      // ================== DOWNLOAD PDF ==================
-
-      // Create blob from PDF bytes
       final blob = html.Blob([Uint8List.fromList(bytes)], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
-
-      // Create download link and trigger download
       final anchor = html.AnchorElement(href: url)
         ..setAttribute("download", "receipt_$orderId.pdf")
         ..style.display = 'none';
 
-      // Append to body, click, then remove
       html.document.body?.append(anchor);
       anchor.click();
 
-      // Clean up
       Future.delayed(const Duration(milliseconds: 500), () {
         html.Url.revokeObjectUrl(url);
         anchor.remove();
       });
 
-      print("PDF Download triggered for: receipt_$orderId.pdf");
-
-      // ================== OPEN WHATSAPP ==================
-
-      // Clean phone number
       String cleanPhone = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
       if (!cleanPhone.startsWith('91')) {
         cleanPhone = '91$cleanPhone';
       }
 
-      // Create WhatsApp message
-      String message =
-          """
+      String message = """
 📱 *SmartFix Tech - Receipt*
 
 Hello $customerName,
@@ -559,7 +980,6 @@ Hello $customerName,
 Thank you for choosing SmartFix Tech! 🙏
 """;
 
-      // Open WhatsApp
       final whatsappUrl =
           "https://wa.me/$cleanPhone?text=${Uri.encodeComponent(message)}";
 
@@ -594,7 +1014,6 @@ Thank you for choosing SmartFix Tech! 🙏
     String status,
   ) async {
     try {
-      // Show loading indicator
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -620,7 +1039,6 @@ Thank you for choosing SmartFix Tech! 🙏
         {'status': status, 'updatedAt': FieldValue.serverTimestamp()},
       );
 
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -635,7 +1053,6 @@ Thank you for choosing SmartFix Tech! 🙏
         ),
       );
     } catch (e) {
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(

@@ -1,10 +1,14 @@
 import 'package:admin_panel/pages/banners/banners_screen.dart';
 import 'package:admin_panel/pages/brands/brands_view.dart';
+import 'package:admin_panel/pages/delivery_partners/partners_list_screen.dart';
 import 'package:admin_panel/pages/home/home_controller.dart';
 import 'package:admin_panel/pages/phonemodels/models_view.dart';
+import 'package:admin_panel/pages/price_details/price_details_screen.dart';
 import 'package:admin_panel/pages/product_screen/product_view.dart';
 import 'package:admin_panel/pages/product_screen/widget/product_list.dart';
 import 'package:admin_panel/pages/service/service_view.dart';
+import 'package:admin_panel/pages/settings_screen/setting_screen.dart';
+import 'package:admin_panel/pages/term_condiontions/term_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -16,123 +20,151 @@ class AdminSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Container(
-      width: isExpanded.value ? 280 : 80,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.grey[900]!,
-            Colors.grey[850]!,
-            Colors.black87,
+    return Obx(
+      () => Container(
+        width: isExpanded.value ? 280 : 80,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.grey[900]!, Colors.grey[850]!, Colors.black87],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(2, 0),
+            ),
           ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(2, 0),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Header section with toggle button
-          _buildHeader(),
-          
-          // Menu Items
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: [
-                // _buildMenuItem(
-                //   icon: Icons.dashboard_outlined,
-                //   title: "Dashboard",
-                //   index: 0,
-                //   onTap: () {},
-                // ),
-                _buildMenuItem(
-                  icon: Icons.post_add_outlined,
-                  title: "Banners",
-                  index: 1,
-                  onTap: () {
-                    selectedIndex.value = 1;
-                    Get.to(() => const BannerPage());
-                  },
-                ),
-                _buildMenuItem(
-                  icon: Icons.branding_watermark_outlined,
-                  title: "Mobile Brands",
-                  index: 2,
-                  onTap: () {
-                    selectedIndex.value = 2;
-                    Get.to(() => BrandPage());
-                  },
-                ),
-                _buildMenuItem(
-                  icon: Icons.build_outlined,
-                  title: "Services",
-                  index: 3,
-                  onTap: () {
-                    selectedIndex.value = 3;
-                    Get.to(() => ServicePage());
-                  },
-                ),
-                _buildMenuItem(
-                  icon: Icons.phone_android_outlined,
-                  title: "Mobile Models",
-                  index: 4,
-                  onTap: () {
-                    selectedIndex.value = 4;
-                    Get.to(() => const ModelPage());
-                  },
-                ),
-                const Divider(color: Colors.white24, height: 32),
-                _buildMenuItem(
-                  icon: Icons.add_shopping_cart_rounded,
-                  title: "Add Product",
-                  index: 5,
-                  onTap: () {
-                    selectedIndex.value = 5;
-                    Get.to(() => AddProductScreen());
-                  },
-                ),
-                _buildMenuItem(
-                  icon: Icons.edit_note_sharp,
-                  title: "Product List",
-                  index: 6,
-                  onTap: () {
-                    selectedIndex.value = 6;
-                    Get.to(() => ProductListScreen());
-                  },
-                ),
-                const Divider(color: Colors.white24, height: 32),
-                _buildMenuItem(
-                  icon: Icons.description_outlined,
-                  title: "Terms & Conditions",
-                  index: 7,
-                  onTap: () {},
-                ),
-              ],
+        child: Column(
+          children: [
+            // Header section with toggle button
+            _buildHeader(),
+
+            // Menu Items
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                children: [
+                  // _buildMenuItem(
+                  //   icon: Icons.dashboard_outlined,
+                  //   title: "Dashboard",
+                  //   index: 0,
+                  //   onTap: () {},
+                  // ),
+                  _buildMenuItem(
+                    icon: Icons.post_add_outlined,
+                    title: "Banners",
+                    index: 1,
+                    onTap: () {
+                      selectedIndex.value = 1;
+                      Get.to(() => const BannerPage());
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.branding_watermark_outlined,
+                    title: "Mobile Brands",
+                    index: 2,
+                    onTap: () {
+                      selectedIndex.value = 2;
+                      Get.to(() => BrandPage());
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.build_outlined,
+                    title: "Services",
+                    index: 3,
+                    onTap: () {
+                      selectedIndex.value = 3;
+                      Get.to(() => ServicePage());
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.phone_android_outlined,
+                    title: "Mobile Models",
+                    index: 4,
+                    onTap: () {
+                      selectedIndex.value = 4;
+                      Get.to(() => const ModelPage());
+                    },
+                  ),
+                  const Divider(color: Colors.white24, height: 32),
+                  _buildMenuItem(
+                    icon: Icons.add_shopping_cart_rounded,
+                    title: "Add Product",
+                    index: 5,
+                    onTap: () {
+                      selectedIndex.value = 5;
+                      Get.to(() => AddProductScreen());
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.edit_note_sharp,
+                    title: "Product List",
+                    index: 6,
+                    onTap: () {
+                      selectedIndex.value = 6;
+                      Get.to(() => ProductListScreen());
+                    },
+                  ),
+                  const Divider(color: Colors.white24, height: 32),
+                  _buildMenuItem(
+                    icon: Icons.delivery_dining_rounded,
+                    title: "Delivery partners",
+                    index: 7,
+                    onTap: () {
+                      selectedIndex.value = 7;
+                      Get.to(() => const PartnersListScreen());
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.edit_document,
+                    title: "Edit Highlights & offers",
+                    index: 8,
+                    onTap: () {
+                      selectedIndex.value = 8;
+                      Get.to(() => const SettingsPage());
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.price_change,
+                    title: "Price Details",
+                    index: 9,
+                    onTap: () {
+                      selectedIndex.value = 9;
+                      Get.to(() => PriceDetailsPage());
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.description_outlined,
+                    title: "Terms & Conditions",
+                    index: 10,
+                    onTap: () {
+                      selectedIndex.value = 10;
+                      Get.to(() => const TermPage());
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-          
-          // Logout button
-          _buildLogoutButton(),
-          
-          const SizedBox(height: 20),
-        ],
+
+            // Logout button
+            _buildLogoutButton(),
+
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
-    ));
+    );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: Row(
-        mainAxisAlignment: isExpanded.value 
-            ? MainAxisAlignment.spaceBetween 
+        mainAxisAlignment: isExpanded.value
+            ? MainAxisAlignment.spaceBetween
             : MainAxisAlignment.center,
         children: [
           if (isExpanded.value) ...[
@@ -166,9 +198,7 @@ class AdminSidebar extends StatelessWidget {
           ],
           IconButton(
             icon: Icon(
-              isExpanded.value 
-                  ? Icons.chevron_left 
-                  : Icons.chevron_right,
+              isExpanded.value ? Icons.chevron_left : Icons.chevron_right,
               color: Colors.white70,
             ),
             onPressed: () => isExpanded.toggle(),
@@ -178,7 +208,7 @@ class AdminSidebar extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildMenuItem({
     required IconData icon,
     required String title,
@@ -186,73 +216,78 @@ class AdminSidebar extends StatelessWidget {
     required VoidCallback onTap,
     bool isLogout = false,
   }) {
-    return Obx(() => MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        decoration: BoxDecoration(
-          gradient: selectedIndex.value == index && !isLogout
-              ? LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Colors.blue.withOpacity(0.2),
-                    Colors.blue.withOpacity(0.05),
-                  ],
-                )
-              : null,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
+    return Obx(
+      () => MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          decoration: BoxDecoration(
+            gradient: selectedIndex.value == index && !isLogout
+                ? LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.blue.withOpacity(0.2),
+                      Colors.blue.withOpacity(0.05),
+                    ],
+                  )
+                : null,
             borderRadius: BorderRadius.circular(12),
-            hoverColor: Colors.white.withOpacity(0.05),
-            splashColor: Colors.blue.withOpacity(0.2),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    icon,
-                    color: isLogout
-                        ? Colors.redAccent
-                        : (selectedIndex.value == index
-                            ? Colors.blueAccent
-                            : Colors.grey[400]),
-                    size: 22,
-                  ),
-                  if (isExpanded.value) ...[
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          color: isLogout
-                              ? Colors.redAccent
-                              : (selectedIndex.value == index
-                                  ? Colors.white
-                                  : Colors.grey[300]),
-                          fontSize: 14,
-                          fontWeight: selectedIndex.value == index
-                              ? FontWeight.w600
-                              : FontWeight.w400,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(12),
+              hoverColor: Colors.white.withOpacity(0.05),
+              splashColor: Colors.blue.withOpacity(0.2),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      color: isLogout
+                          ? Colors.redAccent
+                          : (selectedIndex.value == index
+                                ? Colors.blueAccent
+                                : Colors.grey[400]),
+                      size: 22,
+                    ),
+                    if (isExpanded.value) ...[
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            color: isLogout
+                                ? Colors.redAccent
+                                : (selectedIndex.value == index
+                                      ? Colors.white
+                                      : Colors.grey[300]),
+                            fontSize: 14,
+                            fontWeight: selectedIndex.value == index
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    ));
+    );
   }
-  
+
   Widget _buildLogoutButton() {
     return Container(
       padding: const EdgeInsets.all(12),

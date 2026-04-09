@@ -45,12 +45,13 @@ class BrandPage extends StatelessWidget {
             var brand = controller.brands[index];
 
             return Card(
+              color: Colors.white,
               margin: const EdgeInsets.only(bottom: 10),
               child: ListTile(
                 leading: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
-                    color: Colors.white,
+                    // color: Colors.white,
                     brand["logo"],
                     width: 40,
                     height: 40,

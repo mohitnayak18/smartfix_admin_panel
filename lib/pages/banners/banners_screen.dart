@@ -127,9 +127,10 @@ class _BannerPageState extends State<BannerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.blueGrey,
-        automaticallyImplyActions: true,
-        automaticallyImplyLeading: false,
+        // automaticallyImplyActions: true,
+        // automaticallyImplyLeading: false,
         title: Text(
           "Banner Manager",
           style: TextStyle(
@@ -169,7 +170,10 @@ class _BannerPageState extends State<BannerPage> {
                   var data = banners[index].data() as Map<String, dynamic>;
 
                   String imageUrl = data["imageUrl"] ?? "";
-                  bool active = data["active"] ?? false;
+                  var rawActive = data["active"];
+                  bool active = rawActive is bool
+                      ? rawActive
+                      : rawActive.toString().toLowerCase() == "true";
 
                   return Card(
                     color: Colors.white,
